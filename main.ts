@@ -1,3 +1,25 @@
+scene.onHitWall(SpriteKind.Player, function (sprite, location) {
+    if (hero.isHittingTile(CollisionDirection.Bottom) && hero.vy >= 200) {
+        info.changeLifeBy(-1)
+    }
+})
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (hero.isHittingTile(CollisionDirection.Bottom) || hero.isHittingTile(CollisionDirection.Left) || hero.isHittingTile(CollisionDirection.Right)) {
+        hero.vy = -160
+    }
+})
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    hero.setImage(leftFacingImg)
+})
+scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.chestClosed, function (sprite, location) {
+    game.over(true)
+})
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    hero.setImage(rightFacingImg)
+})
+let hero: Sprite = null
+let leftFacingImg: Image = null
+let rightFacingImg: Image = null
 let rightSwordOutImg = img`
     . . . . . . . f f . . . . . . . 
     . . . . f f f f 2 f f . . . . . 
@@ -34,7 +56,7 @@ let leftSwordOutImg = img`
     . . c . . . f f f f f f f f . . 
     . . . . . . . f f . . f f f . . 
     `
-let rightFacingImg = img`
+rightFacingImg = img`
     . . . . . . . . . . . . . . . . 
     . . . . . f f f f f f . . . . . 
     . . . f f e e e e f 2 f . . . . 
@@ -52,7 +74,7 @@ let rightFacingImg = img`
     . . . f f f f f f f f f f . . . 
     . . . . f f . . . f f f . . . . 
     `
-let leftFacingImg = img`
+leftFacingImg = img`
     . . . . . . . . . . . . . . . . 
     . . . . . f f f f f f . . . . . 
     . . . . f 2 f e e e e f f . . . 
@@ -70,3 +92,28 @@ let leftFacingImg = img`
     . . . f f f f f f f f f f . . . 
     . . . . f f f . . . f f . . . . 
     `
+hero = sprites.create(rightFacingImg, SpriteKind.Player)
+controller.moveSprite(hero, 100, 0)
+tiles.setTilemap(tilemap`level`)
+scene.cameraFollowSprite(hero)
+tiles.placeOnTile(hero, tiles.getTileLocation(1, 30))
+hero.ay = 350
+info.setLife(2)
+game.onUpdateInterval(10, function () {
+    if (hero.isHittingTile(CollisionDirection.Right) && hero.vy > 0) {
+        hero.vy = 15
+        hero.ay = 0
+        hero.setImage(rightSwordOutImg)
+    } else if (hero.isHittingTile(CollisionDirection.Left) && hero.vy > 0) {
+        hero.vy = 15
+        hero.ay = 0
+        hero.setImage(leftSwordOutImg)
+    } else {
+        hero.ay = 350
+        if (hero.image == leftSwordOutImg) {
+            hero.setImage(leftFacingImg)
+        } else if (hero.image == rightSwordOutImg) {
+            hero.setImage(rightFacingImg)
+        }
+    }
+})
